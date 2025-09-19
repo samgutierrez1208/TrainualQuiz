@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Recognition Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-header h2 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .quiz-header .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .exercise-question {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            line-height: 1.7;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .exercise-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 20px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #f0f4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .option-btn.correct {
+            background: #28a745;
+            color: white;
+            animation: correctPulse 0.6s ease-in-out;
+        }
+
+        .option-btn.incorrect {
+            background: #dc3545;
+            color: white;
+            animation: incorrectShake 0.6s ease-in-out;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .option-letter {
+            font-weight: bold;
+            margin-right: 10px;
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background: #667eea;
+            color: white;
+            text-align: center;
+            border-radius: 50%;
+            line-height: 25px;
+            font-size: 0.9em;
+        }
+
+        .option-btn.correct .option-letter {
+            background: #155724;
+        }
+
+        .option-btn.incorrect .option-letter {
+            background: #721c24;
+        }
+
+        .feedback {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 25px;
+            border-radius: 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1em;
+            z-index: 1000;
+            max-width: 400px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .feedback.success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .feedback.error {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .explanation {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .explanation h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .explanation p {
+            line-height: 1.6;
+        }
+
+        .reset-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            .quiz-header h2 {
+                font-size: 1.8em;
+            }
+            
+            .exercise-question {
+                font-size: 1.1em;
+            }
+            
+            .option-btn {
+                padding: 15px 20px;
+                font-size: 1em;
+            }
+            
+            .feedback {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 20px 0;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <span class="icon">🎯</span>
+            <h2>Quick Check: Threat Recognition</h2>
+        </div>
+        
+        <div class="exercise-question">
+            Which of the following scenarios poses the <strong>HIGHEST</strong> cybersecurity risk to your organization?
+        </div>
+        
+        <div class="exercise-options">
+            <button class="option-btn" onclick="checkAnswer(this, false, 'a')">
+                <span class="option-letter">A</span>Using a company laptop on public Wi-Fi
+            </button>
+            <button class="option-btn" onclick="checkAnswer(this, false, 'b')">
+                <span class="option-letter">B</span>Receiving a legitimate email from your bank
+            </button>
+            <button class="option-btn" onclick="checkAnswer(this, true, 'c')">
+                <span class="option-letter">C</span>Clicking a link in an urgent email from "IT" asking for your password
+            </button>
+            <button class="option-btn" onclick="checkAnswer(this, false, 'd')">
+                <span class="option-letter">D</span>Using a strong, unique password for your accounts
+            </button>
+        </div>
+        
+        <div class="explanation" id="explanation">
+            <h4>💡 Explanation:</h4>
+            <p id="explanationText"></p>
+        </div>
+        
+        <button class="reset-btn" onclick="resetQuiz()" style="display: none;" id="resetBtn">
+            Try Again
+        </button>
+    </div>
+
+    <script>
+        let answered = false;
+
+        function checkAnswer(button, isCorrect, option) {
+            if (answered) return;
+            
+            const options = document.querySelectorAll('.option-btn');
+            const explanation = document.getElementById('explanation');
+            const explanationText = document.getElementById('explanationText');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            // Disable all options
+            options.forEach(opt => {
+                opt.disabled = true;
+            });
+            
+            answered = true;
+            
+            if (isCorrect) {
+                button.classList.add('correct');
+                showFeedback('🎉 Correct! Great security awareness!', 'success');
+                explanationText.innerHTML = '<strong>Perfect!</strong> This is a classic phishing attempt that combines multiple red flags: urgency ("urgent email"), authority impersonation ("IT"), and credential harvesting (asking for your password). Legitimate IT departments never ask for passwords via email. This scenario poses the highest risk because it could immediately compromise your entire account and give attackers access to company systems.';
+            } else {
+                button.classList.add('incorrect');
+                
+                // Highlight the correct answer
+                options.forEach(opt => {
+                    if (opt.onclick.toString().includes('true')) {
+                        opt.classList.add('correct');
+                    }
+                });
+                
+                let incorrectExplanation = '';
+                switch(option) {
+                    case 'a':
+                        incorrectExplanation = 'While public Wi-Fi does pose risks, it\'s manageable with proper precautions like VPNs and HTTPS websites.';
+                        break;
+                    case 'b':
+                        incorrectExplanation = 'Legitimate emails from your bank are generally safe, though you should still verify by logging in directly to your account.';
+                        break;
+                    case 'd':
+                        incorrectExplanation = 'Strong, unique passwords are actually a security best practice and reduce risk rather than increase it.';
+                        break;
+                }
+                
+                showFeedback('❌ Not quite right. The correct answer is highlighted.', 'error');
+                explanationText.innerHTML = `<strong>The correct answer is C.</strong> ${incorrectExplanation}<br><br><strong>Why C is the highest risk:</strong> Clicking the malicious link and entering your password would immediately compromise your account, potentially giving attackers access to sensitive company data, systems, and the ability to launch further attacks using your identity.`;
+            }
+            
+            // Show explanation and reset button
+            explanation.classList.add('show');
+            resetBtn.style.display = 'block';
+        }
+
+        function showFeedback(message, type) {
+            // Remove any existing feedback
+            const existingFeedback = document.querySelector('.feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+            
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${type}`;
+            feedback.innerHTML = message;
+            
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.remove();
+                }
+            }, 4000);
+        }
+
+        function resetQuiz() {
+            answered = false;
+            const options = document.querySelectorAll('.option-btn');
+            const explanation = document.getElementById('explanation');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            // Reset all buttons
+            options.forEach(opt => {
+                opt.disabled = false;
+                opt.classList.remove('correct', 'incorrect');
+            });
+            
+            // Hide explanation and reset button
+            explanation.classList.remove('show');
+            resetBtn.style.display = 'none';
+            
+            // Remove any lingering feedback
+            const existingFeedback = document.querySelector('.feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+        }
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (!answered) {
+                switch(e.key) {
+                    case '1':
+                    case 'a':
+                    case 'A':
+                        document.querySelector('.option-btn:nth-child(1)').click();
+                        break;
+                    case '2':
+                    case 'b':
+                    case 'B':
+                        document.querySelector('.option-btn:nth-child(2)').click();
+                        break;
+                    case '3':
+                    case 'c':
+                    case 'C':
+                        document.querySelector('.option-btn:nth-child(3)').click();
+                        break;
+                    case '4':
+                    case 'd':
+                    case 'D':
+                        document.querySelector('.option-btn:nth-child(4)').click();
+                        break;
+                }
+            }
+            
+            if (e.key === 'r' || e.key === 'R') {
+                if (answered) {
+                    resetQuiz();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
